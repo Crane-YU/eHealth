@@ -1,0 +1,8 @@
+<!-- footer.html -->
+{% block footer %}
+    {% if now %}
+        <p style="font-family: Arial;">now: {{ now }}</p>
+    {% else %}
+        <p style="font-family: Arial;">This content is from website</p>
+    {% endif %}
+{% endblock %}

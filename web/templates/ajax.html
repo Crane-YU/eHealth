@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+    <script src="https://cdn.bootcss.com/echarts/4.1.0.rc2/echarts-en.common.js"></script>
+</head>
+<body style="height: 100%; margin: 0">
+<div id="container" style="height: 600px; width: 800px;"></div>
+<input type='button' value='Reload' onclick='setInterval(repeat_func, 1000)'></input>
+<script type='text/javascript'>
+
+var dom = document.getElementById("container");
+var myChart = echarts.init(dom);
+var data_stored = [];    //销量数组--JSON type（实际用来盛放Y坐标值, 用一个数据来储存值，然后用取出来最后一个值
+var app = {};
+var data_length = 0;
+var curr_pos = 0;
+
+function DoAjax(){
+        //var temp = $('#get_value').val();
+        var data_fetch = "";
+			$.ajax({
+				url:'/send_ajax/',
+				type:'POST',
+
+        // Keep this line of code for submitting data from frontend to backend
+				//data:{result:temp},
+				success:function(json){
+          // Get the data from the json file
+          data_stored = json.data;
+          data_length = data_stored.length;
+				},
+
+				error:function(){
+					console.log('failed');
+				}
+			});
+		}
+
+var option = {
+    title: {
+        text: 'Dynamic Data',
+        subtext: 'Example'
+    },
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'cross',
+            label: {
+                backgroundColor: '#283b56'
+            }
+        }
+    },
+    legend: {
+        data:['SPO2 response']
+    },
+    dataZoom: {
+        show: false,
+        start: 0,
+        end: 100
+    },
+    xAxis: [
+        {
+            type: 'category',
+            boundaryGap: true,
+            data: (function (){
+                var now = new Date();
+                var res = [];
+                var len = 10;
+                while (len--) {
+                    res.unshift(now.toLocaleTimeString().replace(/^\D*/,''));
+                    now = new Date(now - 2000);
+                }
+                return res;
+            })()
+        },
+        {
+            type: 'category',
+            boundaryGap: true,
+            data: (function (){
+                var res = [];
+                var len = 10;
+                while (len--) {
+                    res.push(10 - len - 1);
+                }
+                return res;
+            })()
+        }
+    ],
+    yAxis: [
+        {
+            type: 'value',
+            scale: true,
+            name: 'bit rate',
+            max: 5000,
+            min: 1000,
+            boundaryGap: [0.2, 0.2]
+        },
+        {
+          type: 'value',
+          scale: true,
+          max: 5000,
+          min: 1000,
+          boundaryGap: [0.2, 0.2]
+        }
+    ],
+    series: {
+      name:'SPO2 response', // must be the same as the legend data
+      type:'line',
+      data:(function (){
+        var res = [];
+        var len = 0;
+        // Generate random number when the number of elements is less than 10
+        while (len < 10) {
+            res.push(0);
+            len++;
+            // need to test
+            // res.push(data_stored[curr_pos].balance);
+            // curr_pos++;
+            // len++;
+
+        }
+        return res;
+      })()
+  }
+};
+
+app.count = 10;
+
+// this function will auto-refresh the database and send the data to the website
+function repeat_func(){
+    // Get the data from database
+    DoAjax();
+    axisData = (new Date()).toLocaleTimeString().replace(/^\D*/,'');
+    var data = option.series.data;
+    data.shift();
+    // push new data into the echarts
+    if (curr_pos<data_length){
+      // data.shift();
+      data.push(data_stored[curr_pos].balance);
+      curr_pos++;
+    }
+
+    // Display of the time refresh
+    option.xAxis[0].data.shift();
+    option.xAxis[0].data.push(axisData);
+    // Display of the number on the top
+    option.xAxis[1].data.shift();
+    option.xAxis[1].data.push(app.count++);
+    // Refresh the charts
+    myChart.setOption(option);
+}
+
+</script>
+</body>
+</html>

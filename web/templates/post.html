@@ -1,0 +1,14 @@
+<!-- post.html -->
+{% extends 'base.html' %}
+{% load markdown_deux_tags %}
+{% block title %} {{ post.title }}- Literature World{% endblock %}
+
+{% block headmessage %}
+    <h3 style="font-family: Arial;">{{ post.title }}</h3>
+    <a style="font-family: Arial;" href="/">Back to main site</a>
+{% endblock %}
+{% block content %}
+    <p style="font-family: Arial;font-size: 12pt;letter-spacing: 2pt;">
+        {{ post.body | markdown}}
+    </p>
+{% endblock %}
