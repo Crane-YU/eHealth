@@ -72,6 +72,7 @@ def send_json(request):
 # using ajax to exchange the data without refreshing
 @csrf_exempt
 def send_ajax(request):
+
     value = User.objects.all().values()
     user_list = list(value)
     print(value)
@@ -80,6 +81,11 @@ def send_ajax(request):
 
     if request.method == 'POST':
         print(request.POST)
+
+        # sex = request.POST.get('gender')
+        # height = request.POST.get('height')
+        # weight = request.POST.get('weight')
+
         data = {'status': 0, 'msg': 'Post successful', 'data': user_list}
         return JsonResponse(data, safe=False)
     else:
