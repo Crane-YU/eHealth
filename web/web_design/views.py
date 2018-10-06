@@ -75,18 +75,36 @@ def send_ajax(request):
 
     value = User.objects.all().values()
     user_list = list(value)
-    print(value)
+    post_list = list()
+    # print(value)
     # Get the average value
     average = User.objects.all().aggregate(Avg('balance'))
 
     if request.method == 'POST':
-        print(request.POST)
+        # print(request.POST)
 
-        # sex = request.POST.get('gender')
-        # height = request.POST.get('height')
-        # weight = request.POST.get('weight')
+        gender = str(request.POST.get('gender'))
+        height = int(request.POST.get('height'))
+        weight = int(request.POST.get('weight'))
+        BMI = (weight**2)/height
 
-        data = {'status': 0, 'msg': 'Post successful', 'data': user_list}
+        post_list.append(gender)
+        post_list.append(height)
+        post_list.append(weight)
+        print(post_list)
+
+        data = {'status': 0, 'msg': 'Post successful', 'data': post_list+user_list, 'BMI': BMI}
+        # data = {
+        #     'spo2_value': 0,
+        #     'pulse_value': 0,
+        #     'emg_value': 0,
+        #     'bp_value': 0,
+        #     'BMI': BMI,
+        #     'gender': gender;
+        #     'weight': weight,
+        #     'height': height
+        # }
+
         return JsonResponse(data, safe=False)
     else:
         return render(request, 'ajax.html')

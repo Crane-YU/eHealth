@@ -11,12 +11,12 @@ connection = pymysql.connect(host='127.0.0.1',
                              cursorclass=pymysql.cursors.DictCursor)
 
 # This will have to be changed to the serial port you are using
-device = '/dev/tty.usbmodem1411'
+device = '/dev/cu.usbmodem14611'
 cursor = connection.cursor()
 
 try:
     print("Trying...", device)
-    arduino = serial.Serial(device, 9600)
+    arduino = serial.Serial(port='/dev/cu.usbmodem14611', baudrate=115200)
 
 except:
     print("Failed to connect on", device)
@@ -26,16 +26,17 @@ try:
     data = arduino.readline()
     # split the data by the tab
     pieces = data.split("\t")
+    print(pieces)
 
     # Here we are going to insert the data into the Database
-    try:
-        cursor.execute("INSERT INTO weatherData (humidity,tempC) VALUES (%s,%s)", (pieces[0], pieces[1]))
-        # commit the insert
-        connection.commit()
-
-    finally:
-        # close just in case it failed
-        connection.close()
+    # try:
+    #     cursor.execute("INSERT INTO weatherData (humidity,tempC) VALUES (%s,%s)", (pieces[0], pieces[1]))
+    #     # commit the insert
+    #     connection.commit()
+    #
+    # finally:
+    #     # close just in case it failed
+    #     connection.close()
 except:
     # alter the failure
     print("Failed to get data from Arduino!")

@@ -5,11 +5,12 @@
     <script src="https://cdn.bootcss.com/echarts/4.1.0.rc2/echarts-en.common.js"></script>
 </head>
 <body style="height: 100%; margin: 0">
-gender: <input type="text" id="get_gender"></input><br/>
-height: <input type="text" id="get_height"></input><br/>
-weight: <input type="text" id="get_weight"></input><br/>
+Gender: <input type="text" id="get_gender"></input><br/>
+Height: <input type="text" id="get_height"></input><br/>
+Weight: <input type="text" id="get_weight"></input><br/>
 
 <input type='button' value='Reload' onclick='setInterval(repeat_func, 1000)'></input>
+<input type='button' value='submit' onclick='DoAjax()'></input>
 <div id="container" style="height: 600px; width: 800px;"></div>
 <script>
 
@@ -18,24 +19,28 @@ var myChart = echarts.init(dom);
 var data_stored = [];    //JSON type（实际用来盛放Y坐标值，用一个数据来储存值，然后用取出来最后一个值)
 var app = {};
 var data_length = 0;
-var curr_pos = 0;
+var curr_pos = 3;
 
 function DoAjax(){
     // var temp = $('#get_value').val();
-    // var height = $('#get_height').val();
-    // var weight = $('#get_weight').val();
-    // var gender = $('#get_gender').val();
+    var height = $('#get_height').val();
+    var weight = $('#get_weight').val();
+    var gender = $('#get_gender').val();
     // var data_fetch = "";
     $.ajax({
         url:'/send_ajax/',
         type:'POST',
 
         // Keep this line of code for submitting data from frontend to backend
-        //data:{"gender":gender, "weight":weight, "height":height},
+        data:{"gender":gender, "weight":weight, "height":height},
         success:function(json){
             // Get the data from the json file
             data_stored = json.data;
             data_length = data_stored.length;
+            $.each(json.data, function (key, value) {
+            // Testing the data display on the console
+            console.log(key + ': ' + value);
+            });
         },
 
         error:function(){
