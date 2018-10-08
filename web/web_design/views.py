@@ -82,27 +82,14 @@ def send_ajax(request):
 
     if request.method == 'POST':
         # print(request.POST)
-
-        gender = str(request.POST.get('gender'))
-        height = int(request.POST.get('height'))
-        weight = int(request.POST.get('weight'))
-        BMI = (weight**2)/height
-
-        post_list.append(gender)
-        post_list.append(height)
-        post_list.append(weight)
         print(post_list)
 
-        data = {'status': 0, 'msg': 'Post successful', 'data': post_list+user_list, 'BMI': BMI}
+        data = {'status': 0, 'msg': 'Post successful', 'data': post_list+user_list}
         # data = {
         #     'spo2_value': 0,
         #     'pulse_value': 0,
         #     'emg_value': 0,
         #     'bp_value': 0,
-        #     'BMI': BMI,
-        #     'gender': gender;
-        #     'weight': weight,
-        #     'height': height
         # }
 
         return JsonResponse(data, safe=False)
