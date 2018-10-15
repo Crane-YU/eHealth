@@ -4,6 +4,9 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from datetime import datetime
 from .models import User
+from .models import SpoPulse
+from .models import emg_signal
+from .models import bloodpressure_signal
 from django.db.models import Avg
 from django.views.decorators.csrf import csrf_exempt
 
@@ -37,13 +40,13 @@ from django.views.decorators.csrf import csrf_exempt
 
 # using Django to connect to an existing database
 def homepage(request):
-    value = User.objects.values()
+    value = SpoPulse.objects.values()
     print(value)
 
     # The following commands calculate the average of balance
-    posts = User.objects.all()
-    average = posts.aggregate(Avg('balance'))
-    print(average["balance__avg"])
+    posts = SpoPulse.objects.all()
+    # average = posts.aggregate(Avg('balance'))
+    # print(average["balance__avg"])
 
     # for count, post in enumerate(posts):
     #   print(str(count) + str(post))
@@ -73,26 +76,54 @@ def send_json(request):
 @csrf_exempt
 def send_ajax(request):
 
-    value = User.objects.all().values()
-    user_list = list(value)
-    post_list = list()
-    # print(value)
+    value1 = SpoPulse.objects.all().values()
+    user_list1 = list(value1)
+
+    value2 = emg_signal.objects.all().values()
+    user_list2 = list(value2)
+
+    value3 = bloodpressure_signal.objects.all().values()
+    user_list3 = list(value3)
+
     # Get the average value
-    average = User.objects.all().aggregate(Avg('balance'))
+    # average = User.objects.all().aggregate(Avg('spo2'))
 
     if request.method == 'POST':
-        # print(request.POST)
-        print(post_list)
-
-        data = {'status': 0, 'msg': 'Post successful', 'data': post_list+user_list}
-        # data = {
-        #     'spo2_value': 0,
-        #     'pulse_value': 0,
-        #     'emg_value': 0,
-        #     'bp_value': 0,
-        # }
-
+        data = {
+            'status': 'successful',
+            'sp_value': user_list1,
+            'emg_value': user_list2,
+            'bp_value': user_list3
+        }
         return JsonResponse(data, safe=False)
+
     else:
         return render(request, 'ajax.html')
 
+
+@csrf_exempt
+def send_data(request):
+
+    value1 = SpoPulse.objects.all().values()
+    user_list1 = list(value1)
+
+    value2 = emg_signal.objects.all().values()
+    user_list2 = list(value2)
+
+    value3 = bloodpressure_signal.objects.all().values()
+    user_list3 = list(value3)
+
+    # Get the average value
+    # average = User.objects.all().aggregate(Avg('spo2'))
+
+    if request.method == 'POST':
+        data = {
+            'status': 'successful',
+            'sp_value': user_list1,
+            'emg_value': user_list2,
+            'bp_value': user_list3
+        }
+        return JsonResponse(data, safe=False)
+
+    else:
+        return render(request, 'eHealth.html')

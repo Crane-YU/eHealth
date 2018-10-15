@@ -9,7 +9,7 @@ Gender: <input type="text" id="get_gender"></input><br/>
 Height: <input type="text" id="get_height"></input><br/>
 Weight: <input type="text" id="get_weight"></input><br/>
 
-<input type='button' value='Reload' onclick='setInterval(repeat_func, 1000)'></input>
+<input type='button' value='Reload' onclick='setInterval(repeat_func, 200)'></input>
 <input type='button' value='submit' onclick='DoAjax()'></input>
 <div id="container" style="height: 600px; width: 800px;"></div>
 <script>
@@ -17,30 +17,25 @@ Weight: <input type="text" id="get_weight"></input><br/>
 var dom = document.getElementById("container");
 var myChart = echarts.init(dom);
 var data_stored = [];    //JSON type（实际用来盛放Y坐标值，用一个数据来储存值，然后用取出来最后一个值)
+var emg_data = [];
 var app = {};
-var data_length = 0;
-var curr_pos = 3;
+var emg_length = 0;
+var curr_pos = 0;
 
 function DoAjax(){
     // var temp = $('#get_value').val();
-    var height = $('#get_height').val();
-    var weight = $('#get_weight').val();
-    var gender = $('#get_gender').val();
     // var data_fetch = "";
     $.ajax({
         url:'/send_ajax/',
         type:'POST',
 
         // Keep this line of code for submitting data from frontend to backend
-        data:{"gender":gender, "weight":weight, "height":height},
+        // data:{"gender":gender, "weight":weight, "height":height},
         success:function(json){
             // Get the data from the json file
-            data_stored = json.data;
-            data_length = data_stored.length;
-            $.each(json.data, function (key, value) {
-            // Testing the data display on the console
-            console.log(key + ': ' + value);
-            });
+            emg_data = json.emg_value;
+            emg_length = emg_data.length;
+            console.log(data_length);
         },
 
         error:function(){
@@ -104,20 +99,20 @@ var option = {
             type: 'value',
             scale: true,
             name: 'bit rate',
-            max: 5000,
-            min: 1000,
+            max: 3,
+            min: 1,
             boundaryGap: [0.2, 0.2]
         },
         {
           type: 'value',
           scale: true,
-          max: 5000,
-          min: 1000,
+          max: 3,
+          min: 1,
           boundaryGap: [0.2, 0.2]
         }
     ],
     series: {
-      name:'SPO2 response', // must be the same as the legend data
+      name:'emg', // must be the same as the legend data
       type:'line',
       data:(function (){
         var res = [];
@@ -126,11 +121,6 @@ var option = {
         while (len < 10) {
             res.push(0);
             len++;
-            // need to test
-            // res.push(data_stored[curr_pos].balance);
-            // curr_pos++;
-            // len++;
-
         }
         return res;
       })()
@@ -147,9 +137,9 @@ function repeat_func(){
     var data = option.series.data;
     data.shift();
     // push new data into the echarts
-    if (curr_pos<data_length){
-      // data.shift();
-      data.push(data_stored[curr_pos].balance);
+    if (curr_pos < emg_length){
+      data.push(emg_data[curr_pos].emg_voltage);
+      console.log(emg_data[curr_pos].emg_voltage);
       curr_pos++;
     }
 

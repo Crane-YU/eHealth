@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>e-Health website</title>
+  <meta charset="utf-8">
+  <!-- To ensure proper rendering and touch zooming -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+  <script src="https://cdn.bootcss.com/echarts/4.1.0.rc2/echarts-en.common.js"></script>
+  <style>
+  #container1{
+    height: 600px;
+    width: 800px;
+  }
+  #container2{
+    height: 600px;
+    width: 800px;
+  }
+  #container3{
+    height: 600px;
+    width: 800px;
+  }
+  </style>
+</head>
+<body>
+
+<!-- Bootstrap 4 Jumbotron -->
+<div class="jumbotron text-center">
+    <h1>E-health Demo
+    <span class="badge badge-secondary">beta</span>
+    </h1>
+    <p>With functions displayed in the following page</p>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-3">
+      <form>
+        <!-- Weight input box -->
+        <div class="form-group">
+          <h3><label for="Weight_input">Weight(kg)</label></h3>
+          <input type="weight" class="form-control" id="Weight_input" placeholder="Enter weight">
+          <small class="form-text text-muted">We keep your weight as a secret</small>
+        </div>
+        <!-- Height input box -->
+        <div class="form-group">
+          <h3><label for="Height_input">Height(m)</label></h3>
+          <input type="height" class="form-control" id="Height_input" placeholder="Enter height">
+          <small class="form-text text-muted">We keep your height as a secret</small>
+        </div>
+        <!-- Gender selection -->
+        <div class="form-check-inline">
+          <label class="form-check-label" for="radio1">
+            <input type="radio" class="form-check-input" name="gender" value="male">Male
+          </label>
+        </div>
+        <div class="form-check-inline">
+          <label class="form-check-label" for="radio2">
+            <input type="radio" class="form-check-input" name="gender" value="female">Female
+          </label>
+        </div>
+        <br/>
+        <br/>
+      </form>
+      <!-- Submit result -->
+      <button type="submit" class="btn btn-primary" onclick="give_feedback()">Submit</button>
+      <br/>
+      <br/>
+      <!-- Display result -->
+      <div class="alert alert-info">
+        <strong>Info!</strong> <p id="dp1">Your health condition is shown here</p>
+      </div>
+      <hr class="d-md-none">
+    </div>
+
+    <!-- spo2 and pulse block design -->
+    <div class="col-md-8">
+      <h2>Spo2 and Pulse Rate Signal</h2>
+      <h5>Title description</h5>
+      <div id="container1"></div>
+      <button type="button" class="btn btn-secondary" onclick='setInterval(repeat_func1, 1000)'>
+        See the result
+      </button><hr/>
+      <!-- EMG block design -->
+      <h2>EMG Signal</h2>
+      <h5>Title description</h5>
+      <div id="container2"></div>
+      <button type="button" class="btn btn-secondary" onclick='setInterval(repeat_func2, 1000)'>
+        See the result
+      </button><hr/>
+      <!-- blood pressure block design -->
+      <h2>Blood Pressure Signal</h2>
+      <h5>Title description</h5>
+      <div id="container3"></div>
+      <button type="button" class="btn btn-secondary" onclick='setInterval(repeat_func3, 1000)'>
+        See the result
+      </button>
+      <hr/>
+    </div>
+  </div>
+</div>
+
+<script>
+// database value of each measurement
+var sp_value = [];
+var emg_value = [];
+var bp_value = [];
+// data length of the database value
+var sp_length = 0;
+var emg_length = 0;
+var bp_length = 0;
+// position of the data pointer
+var sp_pos = 0;
+var EMG_pos = 0;
+var bp_pos = 0;
+// initialize the dom for echarts
+var dom1 = document.getElementById("container1");
+var dom2 = document.getElementById("container2");
+var dom3 = document.getElementById("container3");
+var myChart1 = echarts.init(dom1);
+var myChart2 = echarts.init(dom2);
+var myChart3 = echarts.init(dom3);
+// data tips
+var app1 = {};
+var app2 = {};
+var app3 = {};
+
+// spo2 and pulse data
+var option1 = {
+  title: {
+    text: 'Spo2 and Pulse Rate',
+  },
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: {
+      type: 'cross',
+      label: {
+        backgroundColor: '#283b56'
+      }
+    }
+  },
+  legend: {
+    data:['Spo2 Rate', 'Pulse Rate']
+  },
+  dataZoom: {
+    show: false,
+    start: 0,
+    end: 100
+  },
+  xAxis: [{
+    type: 'category',
+    boundaryGap: true,
+    data: (function (){
+      var now = new Date();
+      var res = [];
+      var len = 10;
+      while (len--) {
+        res.unshift(now.toLocaleTimeString().replace(/^\D*/,''));
+        now = new Date(now - 1000);
+      }
+      return res;
+    })()
+  },
+  {
+    type: 'category',
+    boundaryGap: true,
+    data: (function (){
+      var res = [];
+      var len = 10;
+      while (len--) {
+        res.push(10 - len - 1);
+      }
+      return res;
+    })()
+  }
+  ],
+  yAxis: [{
+    type: 'value',
+    scale: true,
+    name: 'Spo2 (bits/min)',
+    max: 100,
+    min: 0,
+    boundaryGap: [0.2, 0.2]
+  },
+  {
+    type: 'value',
+    scale: true,
+    name: 'Pulse (bits/min',
+    max: 200,
+    min: 0,
+    boundaryGap: [0.2, 0.2]
+  }
+  ],
+  series: [{
+    name:'Spo2 Rate',
+    type:'line',
+    data:(function (){
+      var res = [];
+      var len = 0;
+      // Generate random number when the number of elements is less than 10
+      while (len < 10) {
+        res.push(0);
+        len++;
+      }
+      return res;
+    })()
+  },
+  {
+    name:'Pulse Rate',
+    type:'line',
+    data:(function (){
+      var res = [];
+      var len = 0;
+      // Generate random number when the number of elements is less than 10
+      while (len < 10) {
+        res.push(0);
+        len++;
+      }
+      return res;
+    })()
+  }
+]};
+// EMG data
+var option2 = {
+  title: {
+    text: 'EMG Data',
+  },
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: {
+      type: 'cross',
+      label: {
+        backgroundColor: '#283b56'
+      }
+    }
+  },
+  legend: {
+    data:['EMG data']
+  },
+  dataZoom: {
+    show: false,
+    start: 0,
+    end: 100
+  },
+  xAxis: [
+  {
+    type: 'category',
+    boundaryGap: true,
+    data: (function (){
+      var res = [];
+      var len = 10;
+      while (len--) {
+        res.unshift(' ');
+      }
+      return res;
+    })()
+  },
+  {
+    type: 'category',
+    boundaryGap: true,
+    data: (function (){
+      var res = [];
+      var len = 10;
+      while (len--) {
+        res.push(10 - len - 1);
+      }
+      return res;
+    })()
+  }
+  ],
+  yAxis: [
+  {
+    type: 'value',
+    scale: true,
+    max: 3,
+    min: 1,
+    boundaryGap: [0.2, 0.2]
+  },
+  {
+    type: 'value',
+    scale: true,
+    max: 3,
+    min: 1,
+    boundaryGap: [0.2, 0.2]
+  }
+  ],
+  series: {
+  name:'EMG data', // must be the same as the legend data
+  type:'line',
+  data:(function (){
+    var res = [];
+    var len = 0;
+    // Generate random number when the number of elements is less than 10
+    while (len < 10) {
+      res.push(0);
+      len++;
+    }
+    return res;
+  })()
+  }};
+ // pressure data
+var option3 = {
+   title: {
+     text: 'Blood Pressure Data',
+   },
+   tooltip: {
+     trigger: 'axis',
+     axisPointer: {
+       type: 'cross',
+       label: {
+         backgroundColor: '#283b56'
+       }
+     }
+   },
+   legend: {
+     data:['diastolic', 'systolic']
+   },
+   dataZoom: {
+     show: false,
+     start: 0,
+     end: 100
+   },
+   xAxis: [
+   {
+     type: 'category',
+     boundaryGap: true,
+     data: (function (){
+       var now = new Date();
+       var res = [];
+       var len = 10;
+       while (len--) {
+         res.unshift(now.toLocaleTimeString().replace(/^\D*/,''));
+         now = new Date(now - 1000);
+       }
+       return res;
+     })()
+   },
+   {
+     type: 'category',
+     boundaryGap: true,
+     data: (function (){
+       var res = [];
+       var len = 10;
+       while (len--) {
+         res.push(10 - len - 1);
+       }
+       return res;
+     })()
+   }
+   ],
+   yAxis: [
+   {
+     type: 'value',
+     scale: true,
+     name: 'mm/Hg',
+     max: 200,
+     min: 0,
+     boundaryGap: [0.2, 0.2]
+   },
+   {
+     type: 'value',
+     scale: true,
+     max: 200,
+     min: 0,
+     boundaryGap: [0.2, 0.2]
+   }
+   ],
+   series: [{
+    name:'diastolic',
+    type:'line',
+    data:(function (){
+      var res = [];
+      var len = 0;
+        // Generate random number when the number of elements is less than 10
+        while (len < 10) {
+          res.push(0);
+          len++;
+        }
+        return res;
+      })()
+    },
+    {
+      name:'systolic',
+      type:'line',
+      data:(function (){
+        var res = [];
+        var len = 0;
+        // Generate random number when the number of elements is less than 10
+        while (len < 10) {
+          res.push(0);
+          len++;
+        }
+        return res;
+      })()
+    }
+]};
+
+// numebr of datapoints displayed in the figure
+app1.count = 10;
+app2.count = 10;
+app3.count = 10;
+
+function DoAjax(){
+  $.ajax({
+    url:'/eHealth/',
+    type:'POST',
+    success:function(json){
+        sp_value = json.sp_value;
+        emg_value = json.emg_value;
+        bp_value = json.bp_value;
+
+        sp_length = sp_value.length;
+        emg_length = emg_value.length;
+        bp_length = bp_value.length;
+    },
+    error:function(){
+      alter('failed');
+    }
+  });
+}
+
+// Tell the result of the BMI!!!!
+function give_feedback(){
+  var weight = $('#Weight_input').val();
+  var height = $('#Height_input').val();
+  var gender = $("input[name='gender']:checked").val();
+  var index = (weight**2)/height;
+  underweight = "Your BMI is within the underweight category. This may not be good for your health. You may be malnourished and develop compromised immune function, respiratory disease, digestive diseases, cancer or osteoporosis. You shou";
+
+  if (gender == 'male' && !isNaN(index)){
+    if (index < 20.7){
+      feedback = "Your BMI is within the underweight category. This may not be good for your health.";
+    }
+    else if (index < 26.4) {
+      feedback = "Your BMI is within the healthy weight category. This is generally good for your health.";
+    }
+    else if (index < 31.3) {
+      feedback = "Your BMI is within the overweight category. This may not be good for your health.";
+    }
+    else{
+     feedback = "Your BMI is within the obese category. This may not be good for your health.";
+    }
+  }
+  else if (gender == "female" && !isNaN(index)){
+    if (index < 19.1){
+      feedback = "Your BMI is within the underweight category. This may not be good for your health.";
+    }
+    else if (index < 25.8) {
+      feedback = "Your BMI is within the healthy weight category. This is generally good for your health. Suggestion: ";
+    }
+    else if (index < 32.3) {
+      feedback = "Your BMI is within the overweight category. This may not be good for your health.";
+    }
+    else{
+      feedback = "Your BMI is within the obese category. This may not be good for your health.";
+    }
+  }
+  else{
+    feedback = "Please enter the correct value!";
+  }
+  $("#dp1").text(feedback);
+}
+
+function repeat_func1(){
+    DoAjax();
+    axisData = (new Date()).toLocaleTimeString().replace(/^\D*/,'');
+    // spo2 data
+    var data0 = option1.series[0].data;
+    // pulse data
+    var data1 = option1.series[1].data;
+
+     // push new data into the echart
+     if (sp_pos < sp_length){
+    	data0.shift();
+        data0.push(sp_value[sp_pos].spo2);
+        data1.shift();
+        data1.push(sp_value[sp_pos].bpm);
+        sp_pos++;
+     }
+
+    // Display of the time refresh
+    option1.xAxis[0].data.shift();
+    option1.xAxis[0].data.push(axisData);
+    // Display of the number on the top
+    option1.xAxis[1].data.shift();
+    option1.xAxis[1].data.push(app1.count++);
+    // Refresh the charts
+    myChart1.setOption(option1);
+}
+
+function repeat_func2(){
+     DoAjax();
+     axisData = (new Date()).toLocaleTimeString().replace(/^\D*/,'');
+     var data = option2.series.data;
+
+     // push new data into the echarts
+     if (EMG_pos < emg_length){
+         data.shift();
+         data.push(emg_value[EMG_pos].emg_voltage);
+         EMG_pos++;
+     }
+
+     // Display of the time refresh
+     option2.xAxis[0].data.shift();
+     option2.xAxis[0].data.push(axisData);
+     // Display of the number on the top
+     option2.xAxis[1].data.shift();
+     option2.xAxis[1].data.push(app2.count++);
+     // Refresh the charts
+     myChart2.setOption(option2);
+}
+
+function repeat_func3(){
+     DoAjax();
+     axisData = (new Date()).toLocaleTimeString().replace(/^\D*/,'');
+     var data0 = option3.series[0].data;
+     var data1 = option3.series[1].data;
+
+     // push new data into the echarts
+     if (bp_pos < bp_length){
+        data0.shift();
+        data0.push(bp_value[bp_pos].diastolic);
+        data1.shift();
+        data1.push(bp_value[bp_pos].systolic);
+        bp_pos++;
+
+     }
+
+     // Display of the time refresh
+     option3.xAxis[0].data.shift();
+     option3.xAxis[0].data.push(axisData);
+     // Display of the number on the top
+     option3.xAxis[1].data.shift();
+     option3.xAxis[1].data.push(app3.count++);
+     // Refresh the charts
+     myChart3.setOption(option3);
+}
+
+function run_bp () {
+  // blood pressure time update
+  var base_time = +new Date(2018, 9, 3);
+  var oneDay = 24 * 3600 * 1000;
+  var date = [];
+  var data_bp = [Math.random() * 150];
+  var now_time = new Date(base_time);
+  var counter = 8;
+  var time = counter * 1000;
+
+  function addData(shift) {
+    now_time = [now_time.getFullYear(), now_time.getMonth() + 1, now_time.getDate()].join('/');
+    date.push(now_time);
+    data_bp.push((Math.random() - 0.4) * 10 + data_bp[data_bp.length - 1]);
+
+  // if (bp_pos < bp_length) {
+  //      data.shift();
+  //      data.push(data_stored[bp_pos].bloodpressure);
+  //      bp_pos++;
+  //    }
+  if (shift) {
+    date.shift();
+    data_bp.shift();
+  }
+  now_time = new Date(+new Date(now_time) + oneDay);
+  }
+
+    for (var i = 1; i < 10; i++) {
+        addData();
+    }
+
+  var option3 = {
+  xAxis: {
+    type: 'category',
+    boundaryGap: false,
+    data: date
+  },
+  yAxis: {
+    boundaryGap: [0, '50%'],
+    type: 'value'
+  },
+  series: [{
+    name: '成交',
+    type: 'line',
+    smooth: true,
+    symbol: 'none',
+    stack: 'a',
+    areaStyle: {
+      normal: {}
+    },
+    data: data_bp
+  }]
+  };
+
+  let timerId = setInterval(function() {
+  addData(true);
+  myChart3.setOption({
+    xAxis: {
+      data: date
+    },
+    series: [{
+      name: '成交',
+      data: data_bp
+    }]
+  });
+  }, 1000);
+
+  setTimeout(() => { clearInterval(timerId); }, time);
+
+  if (option3 && typeof option3 === "object") {
+  myChart3.setOption(option3, true);
+  }
+}
+</script>
+
+</body>
+</html>

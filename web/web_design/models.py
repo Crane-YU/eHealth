@@ -24,4 +24,36 @@ class User(models.Model):
         return self.name, self.balance
 
 
+class SpoPulse(models.Model):
+    spo2 = models.IntegerField()
+    bpm = models.IntegerField()
 
+    class Meta:
+        managed = True
+        db_table = 'bpm_spo2Data'
+
+    def __str__(self):
+        return self.spo2, self.bpm
+
+
+class bloodpressure_signal(models.Model):
+    diastolic = models.IntegerField()
+    systolic = models.IntegerField()
+
+    class Meta:
+        managed = True
+        db_table = 'bloodpressure_signal'
+
+    def __str__(self):
+        return self.diastolic, self.systolic
+
+
+class emg_signal(models.Model):
+    emg_voltage = models.DecimalField(max_digits=5, decimal_places=4)
+
+    class Meta:
+        managed = True
+        db_table = 'emg_signal'
+
+    def __str__(self):
+        return self.emg_voltage

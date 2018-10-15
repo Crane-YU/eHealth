@@ -15,12 +15,13 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from web_design.views import homepage, send_json, send_ajax
+from web_design.views import homepage, send_json, send_ajax, send_data
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', homepage),
     url(r'^send_json/$', send_json),
     url(r'^send_ajax/$', send_ajax),
+    url(r'^eHealth/$', send_data),
     # url(r'^post/(\w+)$', showpost),
 ]
