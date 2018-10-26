@@ -114,14 +114,23 @@ def send_data(request):
     user_list3 = list(value3)
 
     # Get the average value
-    # average = User.objects.all().aggregate(Avg('spo2'))
+    spo2_average = SpoPulse.objects.all().aggregate(Avg('spo2'))
+    pulse_average = SpoPulse.objects.all().aggregate(Avg('bpm'))
+    dia_average = bloodpressure_signal.objects.all().aggregate(Avg('diastolic'))
+    sys_average = bloodpressure_signal.objects.all().aggregate(Avg('systolic'))
+    emg_average = emg_signal.objects.all().aggregate(Avg('emg_voltage'))
 
     if request.method == 'POST':
         data = {
             'status': 'successful',
             'sp_value': user_list1,
             'emg_value': user_list2,
-            'bp_value': user_list3
+            'bp_value': user_list3,
+            'spo2_average': spo2_average,
+            'pulse_average': pulse_average,
+            'dia_average': dia_average,
+            'sys_average': sys_average,
+            'emg_average': emg_average
         }
         return JsonResponse(data, safe=False)
 

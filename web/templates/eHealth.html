@@ -23,6 +23,27 @@
     height: 600px;
     width: 800px;
   }
+  .circle1{
+    height: 50px;
+    width: 50px;
+    background-color:red;
+    border-radius: 50%;
+    display:none;
+  }
+  .circle2 {
+    height: 50px;
+    width: 50px;
+    background-color:yellow;
+    border-radius: 50%;
+    display:none;
+  }
+  .circle3 {
+    height: 50px;
+    width: 50px;
+    background-color:green;
+    border-radius: 50%;
+    display:none;
+  }
   </style>
 </head>
 <body>
@@ -99,6 +120,36 @@
         See the result
       </button>
       <hr/>
+        <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Health condition</th>
+            <th scope="col">Good</th>
+            <th scope="col">Medium</th>
+            <th scope="col">Not Good</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Spo2/pulse rate</th>
+            <td><span class="circle3" id="s1"></span></td>
+            <td><span class="circle2" id="s2"></span></td>
+            <td><span class="circle1" id="s3"></span></td>
+          </tr>
+          <tr>
+            <th scope="row">EMG</th>
+            <td><span class="circle3" id="e1"></span></td>
+            <td><span class="circle2" id="e2"></span></td>
+            <td><span class="circle1" id="e3"></span></td>
+          </tr>
+          <tr>
+            <th scope="row">Blood pressure</th>
+            <td><span class="circle3" id="b1"></span></td>
+            <td><span class="circle2" id="b2"></span></td>
+            <td><span class="circle1" id="b3"></span></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -118,6 +169,13 @@ var bp_length = 0;
 var sp_pos = 0;
 var EMG_pos = 0;
 var bp_pos = 0;
+
+// Average value of measurment
+var spo2_average = 0;
+var pulse_average = 0;
+var dia_average = 0;
+var sys_average = 0;
+var emg_average = 0;
 
 // initialize the dom for echarts
 var dom1 = document.getElementById("container1");
@@ -415,6 +473,11 @@ function DoAjax(){
             sp_value = json.sp_value;
             emg_value = json.emg_value;
             bp_value = json.bp_value;
+            spo2_average = json.spo2_average;
+            pulse_average = json.pulse_average;
+            dia_average = json.dia_average;
+            sys_average = json.sys_average;
+            emg_average = json.emg_average;
 
             sp_length = sp_value.length;
             emg_length = emg_value.length;
@@ -474,7 +537,6 @@ function give_feedback(){
 
 function repeat_sp(){
     DoAjax();
-    console.log(sp_length);
     axisData = (new Date()).toLocaleTimeString().replace(/^\D*/,'');
     // spo2 data
     var data0 = option1.series[0].data;
@@ -497,6 +559,20 @@ function repeat_sp(){
         // Refresh the charts
         myChart1.setOption(option1);
      }
+     if (sp_pos>=sp_length && sp_pos!=0) {
+         if (pulse_average < 40) {
+             document.getElementById('s1').style.display = 'block';
+         }
+         else if (pulse_average < 60) {
+             document.getElementById('s3').style.display = 'block';
+         }
+         else if (pulse_average < 100) {
+             document.getElementById('s2').style.display = 'block';
+         }
+         else {
+             document.getElementById('s1').style.display = 'block';
+         }
+     }
 }
 
 function repeat_emg(){
@@ -518,6 +594,17 @@ function repeat_emg(){
          option2.xAxis[1].data.push(app2.count++);
          // Refresh the charts
          myChart2.setOption(option2);
+     }
+     if (EMG_pos>=emg_length && EMG_pos!=0) {
+         if (emg_average<1) {
+             document.getElementById('e1').style.display='block';
+         }
+         else if (emg_average<2.1) {
+             document.getElementById('e3').style.display='block';
+         }
+         else {
+             document.getElementById('e2').style.display='block';
+         }
      }
 }
 
@@ -544,6 +631,17 @@ function repeat_bp(){
         // Refresh the charts
         myChart3.setOption(option3);
      }
+    if (bp_pos >= bp_length && bp_pos!=0) {
+         if (dia_average<60) {
+             document.getElementById('b2').style.display='block';
+         }
+         else if (dia_average<80) {
+             document.getElementById('b3').style.display='block';
+         }
+         else {
+             document.getElementById('b1').style.display='block';
+         }
+    }
 }
 
 </script>
