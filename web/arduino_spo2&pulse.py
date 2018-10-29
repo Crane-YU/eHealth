@@ -1,4 +1,3 @@
-import pymysql.cursors
 import pymysql
 import serial
 
@@ -10,14 +9,16 @@ connection = pymysql.connect(host='127.0.0.1',
                              charset='utf8mb4',
                              cursorclass=pymysql.cursors.DictCursor)
 
-# This will have to be changed to the serial port you are using
+# This will set the serial port number
 device = serial.Serial('/dev/cu.usbmodem143201', 115200)
 cursor = connection.cursor()
 counter = 0
 
 try:
-    while counter < 10:
+    # Establish the connection on a specific port
+    print("Trying to connect...")
 
+    while counter < 10:
         # read the data from the arduino
         data = device.readline()
 
