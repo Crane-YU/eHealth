@@ -1,6 +1,6 @@
 import serial
 
-ser = serial.Serial('/dev/cu.usbmodem146201', 115200)  # Establish the connection on a specific port
+ser = serial.Serial('/dev/cu.usbmodem143201', 19200)  # Establish the connection on a specific port
 
 while True:
     # read the data from the arduino
@@ -12,7 +12,14 @@ while True:
 
     # split the data by the tab
     pieces = data.split()
-    print(pieces[3])
+    # print(pieces)
+    if len(pieces) == 2:
+        if pieces[0] == "Diastolic:":
+            print("1")
+        if pieces[0] == "Systolic:":
+            print("2")
+        if pieces[0] == "Pulse/min:":
+            print("3")
     # if pieces != []:
     #     data = pieces
     #     pulse = int(data[0][7:len(data[0])-3])

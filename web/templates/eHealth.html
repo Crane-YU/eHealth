@@ -68,7 +68,7 @@
         </div>
         <!-- Height input box -->
         <div class="form-group">
-          <h3><label for="Height_input">Height(m)</label></h3>
+          <h3><label for="Height_input">Height(cm)</label></h3>
           <input type="height" class="form-control" id="Height_input" placeholder="Enter height">
           <small class="form-text text-muted">We keep your height as a secret</small>
         </div>
@@ -100,21 +100,18 @@
     <!-- spo2 and pulse block design -->
     <div class="col-md-8">
       <h2>Spo2 and Pulse Rate Signal</h2>
-      <h5>Title description</h5>
       <div id="container1"></div>
       <button type="button" class="btn btn-secondary" onclick='setInterval(repeat_sp, 1000)'>
         See the result
       </button><hr/>
       <!-- EMG block design -->
       <h2>EMG Signal</h2>
-      <h5>Title description</h5>
       <div id="container2"></div>
       <button type="button" class="btn btn-secondary" onclick='setInterval(repeat_emg, 1000)'>
         See the result
       </button><hr/>
       <!-- blood pressure block design -->
       <h2>Blood Pressure Signal</h2>
-      <h5>Title description</h5>
       <div id="container3"></div>
       <button type="button" class="btn btn-secondary" onclick='setInterval(repeat_bp, 1000)'>
         See the result
@@ -193,7 +190,7 @@ var app3 = {};
 // spo2 and pulse data
 var option1 = {
   title: {
-    text: 'Spo2 and Pulse Rate',
+    text: 'SpO2 and Pulse',
   },
   tooltip: {
     trigger: 'axis',
@@ -205,7 +202,7 @@ var option1 = {
     }
   },
   legend: {
-    data:['Spo2 Rate', 'Pulse Rate']
+    data:['SpO2 Level', 'Pulse Rate']
   },
   dataZoom: {
     show: false,
@@ -241,7 +238,7 @@ var option1 = {
   yAxis: [{
     type: 'value',
     scale: true,
-    name: 'Spo2 (bits/min)',
+    name: 'SpO2 (%)',
     max: 140,
     min: 50,
     boundaryGap: [0.2, 0.2]
@@ -256,7 +253,7 @@ var option1 = {
   }
   ],
   series: [{
-    name:'Spo2 Rate',
+    name:'SpO2 Level',
     type:'line',
     data:(function (){
       var res = [];
@@ -484,7 +481,7 @@ function DoAjax(){
             bp_length = bp_value.length;
             },
         error:function(){
-            alter('failed');
+            alter('Failed');
         }
     });
 }
@@ -505,10 +502,10 @@ function give_feedback(){
     if (index < 20.7){
       feedback = underweight;
     }
-    else if (index < 26.4) {
+    else if (index < 28) {
       feedback = healthy;
     }
-    else if (index < 31.3) {
+    else if (index < 33.3) {
       feedback = overweight;
     }
     else{
@@ -530,7 +527,7 @@ function give_feedback(){
     }
   }
   else{
-    feedback = "Please enter a correct number.";
+    feedback = "Please enter a valid number.";
   }
   $("#dp1").text(feedback);
 }
@@ -543,36 +540,37 @@ function repeat_sp(){
     // pulse data
     var data1 = option1.series[1].data;
 
-     // push new data into the echart
-     if (sp_pos < sp_length){
-    	data0.shift();
+    // push new data into the echart
+    if (sp_pos < sp_length){
+        data0.shift();
         data0.push(sp_value[sp_pos].spo2);
         data1.shift();
         data1.push(sp_value[sp_pos].bpm);
         sp_pos++;
+
         // Display of the time refresh
-         option1.xAxis[0].data.shift();
+        option1.xAxis[0].data.shift();
         option1.xAxis[0].data.push(axisData);
         // Display of the number on the top
         option1.xAxis[1].data.shift();
         option1.xAxis[1].data.push(app1.count++);
         // Refresh the charts
         myChart1.setOption(option1);
-     }
-     if (sp_pos>=sp_length && sp_pos!=0) {
-         if (pulse_average < 40) {
-             document.getElementById('s1').style.display = 'block';
-         }
-         else if (pulse_average < 60) {
-             document.getElementById('s3').style.display = 'block';
-         }
-         else if (pulse_average < 100) {
-             document.getElementById('s2').style.display = 'block';
-         }
-         else {
-             document.getElementById('s1').style.display = 'block';
-         }
-     }
+    }
+    if (sp_pos>=sp_length && sp_pos!=0) {
+        if (pulse_average < 40) {
+            document.getElementById('s1').style.display = 'block';
+        }
+        else if (pulse_average < 60) {
+            document.getElementById('s3').style.display = 'block';
+        }
+        else if (pulse_average < 100) {
+            document.getElementById('s2').style.display = 'block';
+        }
+        else {
+            document.getElementById('s1').style.display = 'block';
+        }
+    }
 }
 
 function repeat_emg(){
