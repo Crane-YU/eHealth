@@ -16,9 +16,6 @@ cursor = connection.cursor()
 counter = 0
 
 try:
-    # print("Trying...", device)
-    # Establish the connection on a specific port
-
     while counter < 10:
 
         # read the data from the arduino
@@ -49,40 +46,3 @@ except:
 finally:
     cursor.close()
     print("Done uploading to database")
-
-# try:
-#     # read the data from the arduino
-#     data = arduino.readline()
-#     # split the data by the tab
-#     pieces = data.split("\t")
-#     print(pieces)
-#
-#     # Here we are going to insert the data into the Database
-#     try:
-#         cursor.execute("INSERT INTO 'bpm_spo2Data' (spo2,bpm) VALUES (%d,%d)", (spo2, pulse))
-#         # commit the insert
-#         connection.commit()
-#
-
-# except:
-#     # alter the failure
-#     print("Failed to get data from Arduino!")
-
-# try:
-# #     with connection.cursor() as cursor:
-# #         # Create a new record
-# #         sql = "INSERT INTO `users` (`email`, `password`) VALUES (%s, %s)"
-# #         cursor.execute(sql, ('webmaster@python.org', 'very-secret'))
-# #
-# #     # connection is not autocommit by default. So you must commit to save
-# #     # your changes.
-# #     connection.commit()
-# #
-# #     with connection.cursor() as cursor:
-# #         # Read a single record
-# #         sql = "SELECT id, name FROM user"
-# #         cursor.execute(sql)
-# #         result = cursor.fetchone()
-# #         print(result)
-# # finally:
-# #     connection.close()
